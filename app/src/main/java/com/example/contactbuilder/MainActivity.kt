@@ -20,14 +20,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -48,9 +54,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.contactbuilder.ui.theme.ContactBuilderTheme
+import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        #2
@@ -154,25 +162,76 @@ class MainActivity : ComponentActivity() {
 //            2
 //            *******************************************************************************************
 //            3
-            // Change the color of the Box by clicking on the ColorBox
-            Column(Modifier.fillMaxSize()){
-                val color = remember {
-                    mutableStateOf(Color.Yellow)
-                }
-                ColorBox(
-                    Modifier
-                        .fillMaxSize()
-                        .weight(1f) // weight will give both boxes the same allowable space.
-                ){
-                    color.value = it
-                }
-                Box(modifier = Modifier
-                    .background(color.value)
-                    .weight(1f)
-                    .fillMaxSize()
-                )
-            }
+//            // Change the color of the Box by clicking on the ColorBox
+//            Column(Modifier.fillMaxSize()){
+//                val color = remember {
+//                    mutableStateOf(Color.Yellow)
+//                }
+//                ColorBox(
+//                    Modifier
+//                        .fillMaxSize()
+//                        .weight(1f) // weight will give both boxes the same allowable space.
+//                ){
+//                    color.value = it
+//                }
+//                Box(modifier = Modifier
+//                    .background(color.value)
+//                    .weight(1f)
+//                    .fillMaxSize()
+//                )
+//            }
 //            3
+//            *******************************************************************************************
+//            4
+//            Scaffold is a layout in Compose which will make it easier to include already existing design components (top bar, toolbar, nav bar, display Snackbars, etc)
+            val snackbarHostState = remember {
+                SnackbarHostState()
+            }
+            // Replace import for remember "import androidx.compose.runtime.remember" with *
+            var textFieldState by remember {
+                mutableStateOf("")
+            }
+            val scope = rememberCoroutineScope()
+            Scaffold(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 30.dp),
+                // Assign a state to the Snackbar to show within Scaffold whenever we want
+                snackbarHost = {
+                    SnackbarHost(hostState = snackbarHostState)
+                }
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(it)
+                ) {
+                    TextField(
+                        value = textFieldState,
+                        label = {
+                            Text("Enter your name")
+                        },
+                        onValueChange = {
+                            textFieldState = it
+                        },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = {
+                         scope.launch {
+                             snackbarHostState.showSnackbar(
+                                 "Hello $textFieldState"
+                             )
+                         }
+                    }) {
+                        Text("Please greet me")
+                    }
+                }
+            }
+//            4
 //            *******************************************************************************************
         }
     }
@@ -226,29 +285,29 @@ fun ImageCard(
 //            1
 //            *******************************************************************************************
 //            3
-@Composable
-fun ColorBox(
-    modifier: Modifier = Modifier,
-    updateColor: (Color) -> Unit
-     ){
-//    Commented to instead change the state of the parent composable
-//    val color = remember {
-////        Without remember, it will default to Yellow instead of remember the last value assigned to the state.
-//        mutableStateOf(Color.Yellow)
-//    }
-        Box(modifier = modifier
-            .background(Color.Red)
-            .clickable {
-                updateColor(
-                    Color(
-                    Random.nextFloat(),
-                    Random.nextFloat(),
-                    Random.nextFloat(),
-                    1f
-                    )
-                )
-            }
-        )
-    }
+//@Composable
+//fun ColorBox(
+//    modifier: Modifier = Modifier,
+//    updateColor: (Color) -> Unit
+// ){
+////    Commented to instead change the state of the parent composable
+////    val color = remember {
+//////        Without remember, it will default to Yellow instead of remember the last value assigned to the state.
+////        mutableStateOf(Color.Yellow)
+////    }
+//    Box(modifier = modifier
+//        .background(Color.Red)
+//        .clickable {
+//            updateColor(
+//                Color(
+//                Random.nextFloat(),
+//                Random.nextFloat(),
+//                Random.nextFloat(),
+//                1f
+//                )
+//            )
+//        }
+//    )
+//}
 //            3
 //            *******************************************************************************************
