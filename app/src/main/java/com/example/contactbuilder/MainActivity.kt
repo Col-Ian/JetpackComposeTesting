@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,7 +20,11 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -40,6 +45,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -53,6 +59,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ChainStyle
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.ConstraintSet
+import androidx.constraintlayout.compose.Dimension
 import com.example.contactbuilder.ui.theme.ContactBuilderTheme
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -185,6 +195,7 @@ class MainActivity : ComponentActivity() {
 //            *******************************************************************************************
 //            4
 //            Scaffold is a layout in Compose which will make it easier to include already existing design components (top bar, toolbar, nav bar, display Snackbars, etc)
+            /*
             val snackbarHostState = remember {
                 SnackbarHostState()
             }
@@ -232,7 +243,101 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+             */
 //            4
+//            *******************************************************************************************
+//            5
+            // Normal scrollable column
+            /*
+            val scrollState = rememberScrollState()
+
+            Column (
+                modifier = Modifier.verticalScroll(scrollState)
+                    ){
+                for(i in 1..50){
+                    Text(
+                        text = "Item $i",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 24.dp)
+                    )
+                }
+            }
+             */
+//            *****************Break in columns********************
+            /*
+            // Lazy scroll column (lazily loads items as you scroll)
+            // Scrolls by default
+            LazyColumn {
+//                items(5000){
+//                // composable that represent a single item
+//                Text(
+//                    text = "Item $it",
+//                    fontSize = 24.sp,
+//                    fontWeight = FontWeight.Bold,
+//                    textAlign = TextAlign.Center,
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(vertical = 24.dp)
+//                )
+//            }
+                // itemsIndexed() is the equivalent to a forEach loop, while items is a for loop which just has access to the numbers
+
+                itemsIndexed(
+                    listOf("This", "is", "Jetpack", "Compose")
+                ) { index, string ->
+                    Text(
+                        text = string,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 24.dp)
+                    )
+                }
+
+            }
+                 */
+//            5
+//            *******************************************************************************************
+//            6
+            val constraints = ConstraintSet {
+                // Create the references for each composable we want to constrain in our layout
+                val greenBox = createRefFor("greenbox")
+                val redBox = createRefFor("redbox")
+                val guideline = createGuidelineFromTop(0.5f)
+
+                constrain(greenBox){
+//                    top.linkTo(parent.top)
+                    top.linkTo(guideline)
+                    start.linkTo(parent.start)
+                    width = Dimension.value(100.dp)
+                    height = Dimension.value(100.dp)
+                }
+                constrain(redBox){
+                    top.linkTo(parent.top)
+                    start.linkTo(greenBox.end)
+//                    end.linkTo(parent.end) // will center between greenBox and the end.
+                    width = Dimension.value(100.dp)
+                    height = Dimension.value(100.dp)
+                }
+                createHorizontalChain(greenBox, redBox, chainStyle = ChainStyle.Packed) // chainStyle = ChainStyle.Packed to pack to the centre
+            }
+            ConstraintLayout(constraints, modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier
+                    .background(Color.Green)
+                    .layoutId("greenbox")
+                )
+                Box(modifier = Modifier
+                    .background(Color.Red)
+                    .layoutId("redbox")
+                )
+            }
+//            6
 //            *******************************************************************************************
         }
     }
